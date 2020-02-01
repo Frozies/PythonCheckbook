@@ -8,8 +8,10 @@ from pip._vendor.distlib.compat import raw_input
 
 
 def main():
+
     ############################ User Input Methods ############################
-    def inputInteger(question):  # N for Number
+
+    def inputInteger(question): ##### Allows Integer input that throws an error for exceptions
         while True:
             try:
                 n = int(input(question))
@@ -18,7 +20,7 @@ def main():
                 print("No valid integer! Please try again ...")
         return n
 
-    def inputString(question):
+    def inputString(question): ##### Allows string input that throws an error for exceptions
         while True:
             try:
                 s = str(input(question))
@@ -27,7 +29,7 @@ def main():
                 print("No valid string! Please try again ...")
         return s
 
-    def inputDate(question):
+    def inputDate(question): ##### Allows date input that throws an error for exceptions
         while True:
             try:
                 date_string = input(question)
@@ -44,6 +46,7 @@ def main():
 
         return entryName, entryDate
 
+    ############################ RUN ############################
     print("You entered:", bookEntry())
 
 
