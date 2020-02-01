@@ -4,8 +4,6 @@
 ####################
 from datetime import datetime
 
-from pip._vendor.distlib.compat import raw_input
-
 
 def main():
 
