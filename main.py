@@ -4,8 +4,10 @@
 # Florida Gulf Coast University
 # Started Jan 2020
 ####################
-from datetime import datetime, time, date
-import json
+import os
+from contextlib import contextmanager
+from datetime import datetime, date
+import csv
 import random
 
 
@@ -42,51 +44,52 @@ def main():
     def inputDate(question):  ##### Allows date input that throws an error for exceptions
         while True:
             try:
-                date_string = input(question)
-                date_object = datetime.strptime(date_string, "%m/%d/%Y")
+                dateString = input(question)
+                dateObject = datetime.strptime(dateString, "%m/%d/%Y")
                 break
             except ValueError:
                 print("Incorrect format Use the format MM/DD/YYYY : ")
-        return date_object
+        return dateObject
+
+    ############################ Save CSV File ############################
+    def checkDir(fileName): ### Checks the directory to see if the data folder and ledger file exists.
+        directory = os.path.dirname(fileName)
+        if not os.path.exists(directory): ### If it doesn't exists, create one.
+            os.makedirs(directory)
+
+    def saveCSV(fileName, entryData, fieldNames):
+        checkDir(fileName)  ### Checks for the directory
+        ledgerSize = 0
+        count = 0
+
+        if os.path.exists(fileName) and os.path.isfile(fileName):
+            ledgerSize = os.stat(fileName).st_size  ### Sets the var ledgerSize to see if its a new file or not.
+
+        if ledgerSize == 0:
+            with open(fileName, 'w', newline='') as csvFile:
+                writer = csv.DictWriter(csvFile, fieldnames=fieldNames)
+                writer.writeheader()  ### If there is no header, write one.
+
+        for record in entryData:
+
+            if count == len(entryData) - 1:  ### Checks to see if the current record section is the last.
+                csvFile = open(fileName, 'a')
+                csvFile.write('%s\n' % record) ### Prints a new line with no comma
+
+            if count != len(entryData) - 1: ### If not the last record, then write the key value with a comma
+                csvFile = open(fileName, 'a')
+                csvFile.write('%s,' % record)
+                count += 1   ### Increase record count
+
+            csvFile.close()
+        return
 
     ############################ Add entry to ledger ############################
     def addEntryToLedger(entryName, entryDate, entryAmount):
-        newEntries = [entryName, str(entryDate), entryAmount]
-
-        # with open('AccountingLedger.json', 'a') as json_file:
-        #  json.dump(newEntries, json_file)
-
-        f = open('AccountingLedger.json', 'r')
-        data = json.load(f)
-        f.close()
-        for (k, v) in data.items():
-            print("Key: " + k)
-            print("Value: " + str(v))
-
-        f = open('AccountingLedger.json', 'w')
-        data = json.load(f)
-        f.close()
-        for (k, v) in data.items():
-            print("Key: " + k)
-            print("Value: " + str(v))
-
-        #this crashes without a file set up. need to create a file with a basic json setup NOT EMPTY
-        # PLAN THIS OUT ON PAPER
-
-        '''
-        ledger = []
-        with open('AccountingLedger.json', 'r') as jsonFile:
-            print(jsonFile)
-            jsonObj = json.load(jsonFile)
-            for entry in jsonObj['data']:
-                ledgerFormatted = [entry[entryName], entry[entryDate], entry[entryAmount]]
-                ledger.append(ledgerFormatted)
-            #except missing file
-                #create file
-                #return to loading and adding entries
-        '''
-
-        print("Dumped", newEntries, " to the ledger.")
+        entryData = [entryName, entryAmount, entryDate]
+        fieldNames = ['Entry Name', 'Entry Amount', 'Entry Date']
+        directory = os.path.abspath(os.path.join(os.path.curdir))
+        saveCSV(directory + "/data/Ledger.csv", entryData, fieldNames)
         return
 
     ############################ Create Entries ############################
@@ -105,18 +108,17 @@ def main():
     def createRandomEntry():
         randomNames = ["The Polar Fiddler", "The Olive Drum", "The Bengal Drum", "The Solar Castle", "The Fire Fusion",
                        "Cinnamon", "The Nightingale", "Fantasia", "Roadhouse"]
-        entryName = random.choice(randomNames)
+        entryName = random.choice(randomNames)   ### Chooses a random name from the list above
 
-        start_date = date.today().replace(day=1, month=1).toordinal()
-        end_date = date.today().toordinal()
-        entryDate = date.fromordinal(random.randint(start_date, end_date))
+        start_date = date.today().replace(day=1, month=1, year=date.year-1).toordinal() ### sets start date to last year
+        end_date = date.today().toordinal() ### Picks sets today as the end date
+        randomDate = date.fromordinal(random.randint(start_date, end_date)) ### Picks a random date in between
+        entryDate = datetime.strptime(str(randomDate), '%Y-%m-%d').strftime('%m/%d/%Y') ### Formats the date correctly
 
-        entryAmount = round((random.random() * 100 + random.random()), 2)
+        entryAmount = round((random.random() * 100 + random.random()), 2) ### Picks a random amount with decimal
 
-        addEntryToLedger(entryName, entryDate, entryAmount)
-        return
-
-    createRandomEntry()  ######## <<--------------------- c: -------------------------------- REMOVE ME --------------
+        addEntryToLedger(entryName, entryDate, entryAmount) ### Adds entry command
+        returns
 
     ############################ RUN / Start checking for input commands ############################
 
@@ -138,7 +140,6 @@ def main():
     else:
         print("That is not a valid command! Please try again.")
         return main()
-
 
 ############################ Book Entry Class ############################
 class BookEntry(object):
