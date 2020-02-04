@@ -5,7 +5,6 @@
 # Started Jan 2020
 ####################
 import os
-from contextlib import contextmanager
 from datetime import datetime, date
 import csv
 import random
@@ -100,6 +99,7 @@ def main():
         ### Asking for Input
         entryName = inputString("Please enter the entry's name: ")
         entryDate = inputDate("Please enter the entry's date \nUse the format MM/DD/YYYY : ")
+        # TODO: Ask for today's date
         entryAmount = inputFloat("Please enter an amount : $")
 
         ## Save to data file
@@ -130,6 +130,11 @@ def main():
 
     # TODO: Create Income vs bill entry
     # TODO: Get account balance
+    # TODO: Add calendar entries
+    # TODO: Add Repeating bills
+
+    # TODO: Eventual Snowball planner
+    # TODO: Credit card account APR Planner
 
     ############################ RUN / Start checking for input commands ############################
 
@@ -151,15 +156,6 @@ def main():
     else:
         print("That is not a valid command! Please try again.")
         return main()
-
-
-############################ Book Entry Class ############################
-class BookEntry(object):
-
-    def __init__(self, name, date, amount):
-        self.name = name
-        self.date = date
-        self.amount = amount
 
 
 if __name__ == "__main__":
