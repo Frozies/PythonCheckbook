@@ -16,67 +16,84 @@ def main():
     def inputInteger(question):  ##### Allows Integer input that throws an error for exceptions
         while True:
             try:
-                n = int(input(question))
+                number = int(input(question))
                 break
             except ValueError:
                 print("No valid integer! Please try again ...")
-        return n
+        return number
 
     def inputFloat(question):  ##### Allows Float input that throws an error for exceptions
         while True:
             try:
-                f = float(input(question))
+                number = float(input(question))
                 break
             except ValueError:
                 print("No valid Float! Please try again ...")
-        return f
+        return number
 
     def inputString(question):  ##### Allows string input that throws an error for exceptions
         while True:
             try:
-                s = str(input(question))
+                string = str(input(question))
                 break
             except ValueError:
                 print("No valid string! Please try again ...")
-        return s
+        return string
 
     def inputDate(question):  ##### Allows date input that throws an error for exceptions
         while True:
             try:
                 dateString = input(question)
-                dateObject = datetime.strptime(dateString, "%m/%d/%Y")
+                dateObject = datetime.strptime(dateString, "%m/%d/%Y").strftime('%m/%d/%Y')
+
                 break
             except ValueError:
                 print("Incorrect format Use the format MM/DD/YYYY : ")
         return dateObject
 
-    ############################ Save CSV File ############################
+    ############################ Load / Save CSV File ############################
+
     def checkDir(fileName):  ### Checks the directory to see if the data folder and ledger file exists.
         directory = os.path.dirname(fileName)
         if not os.path.exists(directory):  ### If it doesn't exists, create one.
             os.makedirs(directory)
 
-    def saveCSV(fileName, entryData, fieldNames):
-        checkDir(fileName)  ### Checks for the directory
+    def loadCSV(inputFileName):  # file_name, dateInRangeStart, dateInRangeEnd, entries
+        directory = os.path.abspath(os.path.join(os.path.curdir))
+        fileName = directory + "/data/" + inputFileName + ".csv"
+        checkDir(fileName)
+        if os.path.exists(fileName):
+            with open(fileName) as file:
+                reader = csv.DictReader(file, delimiter=",")
+                for row in reader:
+                    print(row)  # TODO: Format print output better
+        else:
+            print("File does not exist!")
+        return
+
+    def saveCSV(inputFileName, entryData, fieldNames):
+        directory = os.path.abspath(os.path.join(os.path.curdir))
+        file_name = directory + "/data/" + inputFileName + ".csv"
+        checkDir(file_name)  ### Checks for the directory
         ledgerSize = 0
         count = 0
 
-        if os.path.exists(fileName) and os.path.isfile(fileName):
-            ledgerSize = os.stat(fileName).st_size  ### Sets the var ledgerSize to see if its a new file or not.
+        if os.path.exists(file_name) and os.path.isfile(file_name):
+            ledgerSize = os.stat(file_name).st_size  ### Sets the var ledgerSize to see if its a new file or not.
 
         if ledgerSize == 0:
-            with open(fileName, 'w', newline='') as csvFile:
+            with open(file_name, 'w', newline='') as csvFile:
                 writer = csv.DictWriter(csvFile, fieldnames=fieldNames)
                 writer.writeheader()  ### If there is no header, write one.
 
         for record in entryData:
 
             if count == len(entryData) - 1:  ### Checks to see if the current record section is the last.
-                csvFile = open(fileName, 'a')
+                csvFile = open(file_name, 'a')
                 csvFile.write('%s\n' % record)  ### Prints a new line with no comma
 
             if count != len(entryData) - 1:  ### If not the last record, then write the key value with a comma
-                csvFile = open(fileName, 'a')
+                csvFile = open(file_name, 'a')
                 csvFile.write('%s,' % record)
                 count += 1  ### Increase record count
 
@@ -87,8 +104,8 @@ def main():
     def addEntryToLedger(entryName, entryDate, entryAmount):
         entryData = [entryName, entryAmount, entryDate]
         fieldNames = ['Entry Name', 'Entry Amount', 'Entry Date']
-        directory = os.path.abspath(os.path.join(os.path.curdir))
-        saveCSV(directory + "/data/Ledger.csv", entryData, fieldNames)
+
+        saveCSV("Ledger", entryData, fieldNames)
 
         print(entryData, " was added to the ledger!")
         return
@@ -132,6 +149,7 @@ def main():
     # TODO: Get account balance
     # TODO: Add calendar entries
     # TODO: Add Repeating bills
+    # TODO: Categories
 
     # TODO: Eventual Snowball planner
     # TODO: Credit card account APR Planner
@@ -139,19 +157,33 @@ def main():
     ############################ RUN / Start checking for input commands ############################
 
     print("\n")  # Decorative line break
+    # TODO: Print a description of the program on start
     commandInput = input("Please enter a command or type help: ")
 
-    while commandInput == "help":
+    if commandInput == "help":
         print("Command list:"
               "\naddEntry - Adds an Entry into the checkbook",
               "\nhelp - Shows a list of commands",
-              "\nrandomEntry - creates a random entry to input into the ledger (for debug c:)")
+              "\nrandomEntry - creates a random entry to input into the ledger (for debug c:)",
+              "\nlistEntries - lists entries in ledger",
+              "\naddBill - adds a negative entry",
+              "\naddIncome - adds a positive entry"
+              )
         return main()
-    while commandInput == "addEntry":
+    if commandInput == "addEntry":
         createEntry()
         return main()
-    while commandInput == "randomEntry":
+    if commandInput == "randomEntry":
         createRandomEntry()
+        return main()
+    if commandInput == "listEntries":
+        loadCSV("Ledger")
+        return main()
+    if commandInput == "addBill":
+        createEntry()
+        return main()
+    if commandInput == "addIncome":
+        createEntry()
         return main()
     else:
         print("That is not a valid command! Please try again.")
