@@ -44,8 +44,10 @@ def main():
         while True:
             try:
                 dateString = input(question)
-                dateObject = datetime.strptime(dateString, "%m/%d/%Y").strftime('%m/%d/%Y')
-
+                if dateString == "":
+                    dateObject = date.today().strftime('%m/%d/%Y')
+                else:
+                    dateObject = datetime.strptime(dateString, "%m/%d/%Y").strftime('%m/%d/%Y')
                 break
             except ValueError:
                 print("Incorrect format Use the format MM/DD/YYYY : ")
@@ -115,8 +117,8 @@ def main():
     def createEntry():
         ### Asking for Input
         entryName = inputString("Please enter the entry's name: ")
-        entryDate = inputDate("Please enter the entry's date \nUse the format MM/DD/YYYY : ")
-        # TODO: Ask for today's date
+        entryDate = inputDate("Please enter the entry's  or leave blank to use today's date"
+                              " \nUse the format MM/DD/YYYY : ")
         entryAmount = inputFloat("Please enter an amount : $")
 
         ## Save to data file
