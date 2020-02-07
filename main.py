@@ -10,155 +10,173 @@ import csv
 import random
 
 
-def main():
+def calculateCurrentBalance(entryAmount):
+    pass
+
     ############################ User Input Methods ############################
 
-    def inputInteger(question):  ##### Allows Integer input that throws an error for exceptions
-        while True:
-            try:
-                number = int(input(question))
-                break
-            except ValueError:
-                print("No valid integer! Please try again ...")
-        return number
 
-    def inputFloat(question):  ##### Allows Float input that throws an error for exceptions
-        while True:
-            try:
-                number = float(input(question))
-                break
-            except ValueError:
-                print("No valid Float! Please try again ...")
-        return number
+def inputInteger(question):  ##### Allows Integer input that throws an error for exceptions
+    while True:
+        try:
+            number = int(input(question))
+            break
+        except ValueError:
+            print("No valid integer! Please try again ...")
+    return number
 
-    def inputString(question):  ##### Allows string input that throws an error for exceptions
-        while True:
-            try:
-                string = str(input(question))
-                break
-            except ValueError:
-                print("No valid string! Please try again ...")
-        return string
 
-    def inputDate(question):  ##### Allows date input that throws an error for exceptions
-        while True:
-            try:
-                dateString = input(question)
-                if dateString == "":
-                    dateObject = date.today().strftime('%m/%d/%Y')
-                else:
-                    dateObject = datetime.strptime(dateString, "%m/%d/%Y").strftime('%m/%d/%Y')
-                break
-            except ValueError:
-                print("Incorrect format Use the format MM/DD/YYYY : ")
-        return dateObject
+def inputFloat(question):  ##### Allows Float input that throws an error for exceptions
+    while True:
+        try:
+            number = float(input(question))
+            break
+        except ValueError:
+            print("No valid Float! Please try again ...")
+    return number
+
+
+def inputString(question):  ##### Allows string input that throws an error for exceptions
+    while True:
+        try:
+            string = str(input(question))
+            break
+        except ValueError:
+            print("No valid string! Please try again ...")
+    return string
+
+
+def inputDate(question):  ##### Allows date input that throws an error for exceptions
+    while True:
+        try:
+            dateString = input(question)
+            if dateString == "":
+                dateObject = date.today().strftime('%m/%d/%Y')
+            else:
+                dateObject = datetime.strptime(dateString, "%m/%d/%Y").strftime('%m/%d/%Y')
+            break
+        except ValueError:
+            print("Incorrect format Use the format MM/DD/YYYY : ")
+    return dateObject
 
     ############################ Load / Save CSV File ############################
 
-    def checkDir(fileName):  ### Checks the directory to see if the data folder and ledger file exists.
-        directory = os.path.dirname(fileName)
-        if not os.path.exists(directory):  ### If it doesn't exists, create one.
-            os.makedirs(directory)
 
-    def loadCSV(inputFileName):  # file_name, dateInRangeStart, dateInRangeEnd, entries
-        directory = os.path.abspath(os.path.join(os.path.curdir))
-        fileName = directory + "/data/" + inputFileName + ".csv"
-        checkDir(fileName)
-        if os.path.exists(fileName):
-            with open(fileName) as file:
-                reader = csv.DictReader(file, delimiter=",")
-                for row in reader:
-                    print(row)  # TODO: Format print output better
-        else:
-            print("File does not exist!")
-        return
+def checkDir(fileName):  ### Checks the directory to see if the data folder and ledger file exists.
+    directory = os.path.dirname(fileName)
+    if not os.path.exists(directory):  ### If it doesn't exists, create one.
+        os.makedirs(directory)
 
-    def saveCSV(inputFileName, entryData, fieldNames):
-        directory = os.path.abspath(os.path.join(os.path.curdir))
-        file_name = directory + "/data/" + inputFileName + ".csv"
-        checkDir(file_name)  ### Checks for the directory
-        ledgerSize = 0
-        count = 0
 
-        if os.path.exists(file_name) and os.path.isfile(file_name):
-            ledgerSize = os.stat(file_name).st_size  ### Sets the var ledgerSize to see if its a new file or not.
+def loadCSV(inputFileName):  # file_name, dateInRangeStart, dateInRangeEnd, entries
+    directory = os.path.abspath(os.path.join(os.path.curdir))
+    fileName = directory + "/data/" + inputFileName + ".csv"
+    checkDir(fileName)
+    if os.path.exists(fileName):
+        with open(fileName) as file:
+            reader = csv.DictReader(file, delimiter=",")
+            for row in reader:
+                print(row)  # TODO: Format print output better
+    else:
+        print("File does not exist!")
+    return
 
-        if ledgerSize == 0:
-            with open(file_name, 'w', newline='') as csvFile:
-                writer = csv.DictWriter(csvFile, fieldnames=fieldNames)
-                writer.writeheader()  ### If there is no header, write one.
 
-        for record in entryData:
+def saveCSV(inputFileName, entryData, fieldNames):
+    directory = os.path.abspath(os.path.join(os.path.curdir))
+    file_name = directory + "/data/" + inputFileName + ".csv"
+    checkDir(file_name)  ### Checks for the directory
+    ledgerSize = 0
+    count = 0
 
-            if count == len(entryData) - 1:  ### Checks to see if the current record section is the last.
-                csvFile = open(file_name, 'a')
-                csvFile.write('%s\n' % record)  ### Prints a new line with no comma
+    if os.path.exists(file_name) and os.path.isfile(file_name):
+        ledgerSize = os.stat(file_name).st_size  ### Sets the var ledgerSize to see if its a new file or not.
 
-            if count != len(entryData) - 1:  ### If not the last record, then write the key value with a comma
-                csvFile = open(file_name, 'a')
-                csvFile.write('%s,' % record)
-                count += 1  ### Increase record count
+    if ledgerSize == 0:
+        with open(file_name, 'w', newline='') as csvFile:
+            writer = csv.DictWriter(csvFile, fieldnames=fieldNames)
+            writer.writeheader()  ### If there is no header, write one.
 
-            csvFile.close()
-        return
+    for record in entryData:
+
+        if count == len(entryData) - 1:  ### Checks to see if the current record section is the last.
+            csvFile = open(file_name, 'a')
+            csvFile.write('%s\n' % record)  ### Prints a new line with no comma
+
+        if count != len(entryData) - 1:  ### If not the last record, then write the key value with a comma
+            csvFile = open(file_name, 'a')
+            csvFile.write('%s,' % record)
+            count += 1  ### Increase record count
+
+        csvFile.close()
+    return
 
     ############################ Add entry to ledger ############################
-    def addEntryToLedger(entryName, entryDate, entryAmount):
-        entryData = [entryName, entryAmount, entryDate]
-        fieldNames = ['Entry Name', 'Entry Amount', 'Entry Date']
 
-        saveCSV("Ledger", entryData, fieldNames)
 
-        print(entryData, " was added to the ledger!")
-        return
+def addEntryToLedger(entryName, entryDate, entryAmount):
+    entryData = [entryName, entryAmount, entryDate]
+    fieldNames = ['Entry Name', 'Entry Amount', 'Entry Date']
+
+    saveCSV("Checking", entryData, fieldNames)
+
+    calculateCurrentBalance(entryAmount)
+
+    print(entryData, " was added to the ledger!")
+    return
 
     ############################ Create Entries ############################
 
-    def createEntry():
-        ### Asking for Input
-        entryName = inputString("Please enter the entry's name: ")
-        entryDate = inputDate("Please enter the entry's  or leave blank to use today's date"
-                              " \nUse the format MM/DD/YYYY : ")
-        entryAmount = inputFloat("Please enter an amount, use a negative for any bills: $")
 
-        ## Save to data file
-        addEntryToLedger(entryName, entryDate, entryAmount)
+def createEntry():
+    ### Asking for Input
+    entryName = inputString("Please enter the entry's name: ")
+    entryDate = inputDate("Please enter the entry's  or leave blank to use today's date"
+                          " \nUse the format MM/DD/YYYY : ")
+    entryAmount = inputFloat("Please enter an amount, use a negative for any bills: $")
 
-        return
+    ## Save to data file
+    addEntryToLedger(entryName, entryDate, entryAmount)
 
-    def createRandomEntry():
-        randomNames = ["The Polar Fiddler", "The Olive Drum", "The Bengal Drum", "The Solar Castle", "The Fire Fusion",
-                       "Cinnamon", "The Nightingale", "Fantasia", "Roadhouse"]
-        entryName = random.choice(randomNames)  ### Chooses a random name from the list above
+    return
 
-        start_date = date.today().replace(day=1, month=1).toordinal()
-        end_date = date.today().toordinal()  ### Picks sets today as the end date
-        randomDate = date.fromordinal(random.randint(start_date, end_date))  ### Picks a random date in between
-        entryDate = datetime.strptime(str(randomDate), '%Y-%m-%d').strftime('%m/%d/%Y')  ### Formats the date correctly
 
-        entryAmount = round((random.random() * 100 + random.random()), 2)  ### Picks a random amount with decimal
+def createRandomEntry():
+    randomNames = ["The Polar Fiddler", "The Olive Drum", "The Bengal Drum", "The Solar Castle", "The Fire Fusion",
+                   "Cinnamon", "The Nightingale", "Fantasia", "Roadhouse"]
+    entryName = random.choice(randomNames)  ### Chooses a random name from the list above
 
-        if bool(random.getrandbits(1)): ### Randomizes to count as bill or income
-            entryAmount = entryAmount * -1
+    start_date = date.today().replace(day=1, month=1).toordinal()
+    end_date = date.today().toordinal()  ### Picks sets today as the end date
+    randomDate = date.fromordinal(random.randint(start_date, end_date))  ### Picks a random date in between
+    entryDate = datetime.strptime(str(randomDate), '%Y-%m-%d').strftime('%m/%d/%Y')  ### Formats the date correctly
 
-        addEntryToLedger(entryName, entryDate, entryAmount)  ### Adds entry command
-        return
+    entryAmount = round((random.random() * 100 + random.random()), 2)  ### Picks a random amount with decimal
 
-    ############################ List Entries ############################
+    if bool(random.getrandbits(1)):  ### Randomizes to count as bill or income
+        entryAmount = entryAmount * -1
 
-    # TODO: Create a function to list the entries in order by date
+    addEntryToLedger(entryName, entryDate, entryAmount)  ### Adds entry command
+    return
 
-    ############################ Account Information ############################
 
-    # TODO: Create Income vs bill entry
-    # TODO: Get account balance
-    # TODO: Add calendar entries
-    # TODO: Add Repeating bills
-    # TODO: Categories
+############################ List Entries ############################
 
-    # TODO: Eventual Snowball planner
-    # TODO: Credit card account APR Planner
+# TODO: Create a function to list the entries in order by date
 
+############################ Account Information ############################
+
+# TODO: Create Income vs bill entry
+# TODO: Get account balance
+# TODO: Add calendar entries
+# TODO: Add Repeating bills
+# TODO: Categories
+
+# TODO: Eventual Snowball planner
+# TODO: Credit card account APR Planner
+
+
+def main():
     ############################ RUN / Start checking for input commands ############################
 
     print("\n")  # Decorative line break
