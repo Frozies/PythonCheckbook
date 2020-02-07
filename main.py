@@ -119,7 +119,7 @@ def main():
         entryName = inputString("Please enter the entry's name: ")
         entryDate = inputDate("Please enter the entry's  or leave blank to use today's date"
                               " \nUse the format MM/DD/YYYY : ")
-        entryAmount = inputFloat("Please enter an amount : $")
+        entryAmount = inputFloat("Please enter an amount, use a negative for any bills: $")
 
         ## Save to data file
         addEntryToLedger(entryName, entryDate, entryAmount)
@@ -137,6 +137,9 @@ def main():
         entryDate = datetime.strptime(str(randomDate), '%Y-%m-%d').strftime('%m/%d/%Y')  ### Formats the date correctly
 
         entryAmount = round((random.random() * 100 + random.random()), 2)  ### Picks a random amount with decimal
+
+        if bool(random.getrandbits(1)): ### Randomizes to count as bill or income
+            entryAmount = entryAmount * -1
 
         addEntryToLedger(entryName, entryDate, entryAmount)  ### Adds entry command
         return
