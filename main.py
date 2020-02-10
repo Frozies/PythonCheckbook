@@ -20,8 +20,8 @@ def recalculateAllTransactions():
     ledgerCSV = loadCSV("Checking", False)
 
     with open(ledgerCSV) as file:
-        df = pd.read_csv(file)
-        saved_column = df['Entry Amount']
+        dataFrame = pd.read_csv(file)
+        saved_column = dataFrame['Entry Amount']
         newBalance = sum(saved_column)
     return newBalance
 
@@ -89,13 +89,12 @@ def loadCSV(inputFileName, printValues):  # file_name, dateInRangeStart, dateInR
         return
     if os.path.exists(fileName) & printValues is True:
         with open(fileName) as file:
-            reader = csv.DictReader(file, delimiter=",") #TODO: Use Pandas
-            for row in reader:
-                print(row)  # TODO: Format print output better, make print ledger entries its own function
+            dataFrame = pd.read_csv(file)
+            print(dataFrame)
     return fileName
 
 
-def saveCSV(inputFileName, entryData, fieldNames):
+def saveCSV(inputFileName, entryData, fieldNames): #TODO: Use Pandas
     directory = os.path.abspath(os.path.join(os.path.curdir))
     fileName = directory + "/data/" + inputFileName + ".csv"
     checkDir(fileName)  ### Checks for the directory
@@ -107,7 +106,7 @@ def saveCSV(inputFileName, entryData, fieldNames):
 
     if ledgerSize == 0:
         with open(fileName, 'w', newline='') as csvFile:
-            writer = csv.DictWriter(csvFile, fieldnames=fieldNames) #TODO: Use Pandas
+            writer = csv.DictWriter(csvFile, fieldnames=fieldNames)
             writer.writeheader()  ### If there is no header, write one.
 
     for record in entryData:
