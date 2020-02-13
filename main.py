@@ -8,24 +8,24 @@ import os
 from datetime import datetime, date
 import csv
 import random
-import pandas as pd
-
-
-def calculateCurrentBalance(currentBalance, entryAmount):
-    balance = float(currentBalance + entryAmount)
-    return balance
+#
+# def calculateCurrentBalance(entryAmount):
+#     balance = float(Totalbalance - entryAmount)
+#     return balance
 
 
 def recalculateAllTransactions():
     ledgerCSV = loadCSV("Checking", False)
+    balance = 0
+    if ledgerCSV:
+        with open(ledgerCSV) as file:
+            reader = csv.DictReader(file, delimiter=",")
+            entryAmount = sum(float(row['Entry Amount']) for row in reader)
+        balance += entryAmount
+    return balance
 
-    with open(ledgerCSV) as file:
-        df = pd.read_csv(file)
-        saved_column = df['Entry Amount']
-        newBalance = sum(saved_column)
-    return newBalance
 
-    ############################ User Input Methods ############################
+############################ User Input Methods ############################
 
 
 def inputInteger(question):  ##### Allows Integer input that throws an error for exceptions
@@ -89,7 +89,7 @@ def loadCSV(inputFileName, printValues):  # file_name, dateInRangeStart, dateInR
         return
     if os.path.exists(fileName) & printValues is True:
         with open(fileName) as file:
-            reader = csv.DictReader(file, delimiter=",") #TODO: Use Pandas
+            reader = csv.DictReader(file, delimiter=",")
             for row in reader:
                 print(row)  # TODO: Format print output better, make print ledger entries its own function
     return fileName
@@ -97,49 +97,43 @@ def loadCSV(inputFileName, printValues):  # file_name, dateInRangeStart, dateInR
 
 def saveCSV(inputFileName, entryData, fieldNames):
     directory = os.path.abspath(os.path.join(os.path.curdir))
-    fileName = directory + "/data/" + inputFileName + ".csv"
-    checkDir(fileName)  ### Checks for the directory
+    file_name = directory + "/data/" + inputFileName + ".csv"
+    checkDir(file_name)  ### Checks for the directory
     ledgerSize = 0
     count = 0
 
-    if os.path.exists(fileName) and os.path.isfile(fileName):
-        ledgerSize = os.stat(fileName).st_size  ### Sets the var ledgerSize to see if its a new file or not.
+    if os.path.exists(file_name) and os.path.isfile(file_name):
+        ledgerSize = os.stat(file_name).st_size  ### Sets the var ledgerSize to see if its a new file or not.
 
     if ledgerSize == 0:
-        with open(fileName, 'w', newline='') as csvFile:
-            writer = csv.DictWriter(csvFile, fieldnames=fieldNames) #TODO: Use Pandas
+        with open(file_name, 'w', newline='') as csvFile:
+            writer = csv.DictWriter(csvFile, fieldnames=fieldNames)
             writer.writeheader()  ### If there is no header, write one.
 
     for record in entryData:
 
         if count == len(entryData) - 1:  ### Checks to see if the current record section is the last.
-            try:
-                csvFile = open(fileName, 'a')
-                csvFile.write('%s\n' % record)  ### Prints a new line with no comma
-                csvFile.close()
-            except PermissionError:
-                print("Permission Error!")
+            csvFile = open(file_name, 'a')
+            csvFile.write('%s\n' % record)  ### Prints a new line with no comma
 
         if count != len(entryData) - 1:  ### If not the last record, then write the key value with a comma
-            try:
-                csvFile = open(fileName, 'a')
-                csvFile.write('%s,' % record)
-                count += 1  ### Increase record count
-                csvFile.close()
-            except PermissionError:
-                print("Permission Error!")
+            csvFile = open(file_name, 'a')
+            csvFile.write('%s,' % record)
+            count += 1  ### Increase record count
+
+        csvFile.close()
     return
 
     ############################ Add entry to ledger ############################
 
 
-def addEntryToLedger(entryName, entryDate, entryAmount, currentBalance, ledgerFile):
+def addEntryToLedger(entryName, entryDate, entryAmount):
     entryData = [entryName, entryAmount, entryDate]
     fieldNames = ['Entry Name', 'Entry Amount', 'Entry Date']
 
-    saveCSV(ledgerFile, entryData, fieldNames)
+    saveCSV("Checking", entryData, fieldNames)
 
-    calculateCurrentBalance(currentBalance, entryAmount)
+    # calculateCurrentBalance(entryAmount)
 
     print(entryData, " was added to the ledger!")
     return
@@ -147,7 +141,7 @@ def addEntryToLedger(entryName, entryDate, entryAmount, currentBalance, ledgerFi
     ############################ Create Entries ############################
 
 
-def createEntry(currentBalance, ledgerFile):
+def createEntry():
     ### Asking for Input
     entryName = inputString("Please enter the entry's name: ")
     entryDate = inputDate("Please enter the entry's  or leave blank to use today's date"
@@ -155,12 +149,12 @@ def createEntry(currentBalance, ledgerFile):
     entryAmount = inputFloat("Please enter an amount, use a negative for any bills: $")
 
     ## Save to data file
-    addEntryToLedger(entryName, entryDate, entryAmount, currentBalance, ledgerFile)
+    addEntryToLedger(entryName, entryDate, entryAmount)
 
     return
 
 
-def createRandomEntry(currentBalance, ledgerFile):
+def createRandomEntry():
     randomNames = ["The Polar Fiddler", "The Olive Drum", "The Bengal Drum", "The Solar Castle", "The Fire Fusion",
                    "Cinnamon", "The Nightingale", "Fantasia", "Roadhouse"]
     entryName = random.choice(randomNames)  ### Chooses a random name from the list above
@@ -175,7 +169,7 @@ def createRandomEntry(currentBalance, ledgerFile):
     if bool(random.getrandbits(1)):  ### Randomizes to count as bill or income
         entryAmount = entryAmount * -1
 
-    addEntryToLedger(entryName, entryDate, entryAmount, currentBalance, ledgerFile)  ### Adds entry command
+    addEntryToLedger(entryName, entryDate, entryAmount)  ### Adds entry command
     return
 
 
@@ -198,7 +192,6 @@ def createRandomEntry(currentBalance, ledgerFile):
 def main():
     Totalbalance = 0
     Totalbalance = recalculateAllTransactions()  ### On start recalculate all balances
-    ledgerFile = "Checking"
 
     ############################ RUN / Start checking for input commands ############################
 
@@ -210,34 +203,32 @@ def main():
         print("Command list:"
               "\naddTransaction - Adds an Entry into the checkbook",
               "\nhelp - Shows a list of commands",
-              "\nrandomTransaction - Creates a random entry to input into the ledger (for debug c:)",
-              "\nlistTransactions - Lists entries in ledger",
-              "\nprintBalance - Prints the current balance",
-              "\nrecalculateBalance - Recalculates the balance from the ledger."
+              "\nrandomTransaction - creates a random entry to input into the ledger (for debug c:)",
+              "\nlistTransactions - lists entries in ledger",
+              "\nprintBalance - prints the current balance",
+              "\nrecalculateBalance - Recalculates all balances"
               )
         return main()
 
     if commandInput == "addTransaction":
-        createEntry(Totalbalance, ledgerFile)
+        createEntry()
         return main()
 
-    if commandInput == "randomEntry":
-        createRandomEntry(Totalbalance, ledgerFile)
+    if commandInput == "randomTransaction":
+        createRandomEntry()
         return main()
 
     if commandInput == "listTransactions":
-        loadCSV(ledgerFile, printValues=True)
-        print("Current Balance: ", Totalbalance)
+        loadCSV("Checking", printValues=True)
         return main()
 
     if commandInput == "recalculateBalance":
-        recalculateAllTransactions()
-        print("Old Balance: ", Totalbalance)
-        print("Recalculated Balance: ", recalculateAllTransactions())
+        Totalbalance == recalculateAllTransactions()
+        print("Current Balance: ", round(Totalbalance, 2))
         return main()
 
     if commandInput == "printBalance":
-        print("Saved Balance: ", Totalbalance)
+        print("Current Balance: ", round(Totalbalance, 2))
         return main()
 
     else:
