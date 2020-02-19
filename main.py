@@ -4,31 +4,44 @@
 # Florida Gulf Coast University
 # Started Jan 2020
 ####################
+
+#### Current Todo: Comment EVERYTHING
+## After TODO: calculate current balance
+# TODO: Create a function to list the entries in order by date
+# TODO: Account Information
+# TODO: Create Income vs bill entry
+# TODO: Get account balance
+# TODO: Add calendar entries
+# TODO: Add Repeating bills
+# TODO: Categories
+# TODO: Averages
+# TODO: Eventual Snowball planner
+# TODO: Credit card account APR Planner
+# TODO: read bank statements and ask about each transaction.
+
 import os
 from datetime import datetime, date
 import csv
 import random
+
+
 #
 # def calculateCurrentBalance(entryAmount):
 #     balance = float(Totalbalance - entryAmount)
 #     return balance
 
-
-def recalculateAllTransactions():
-    ledger_csv = loadCSV("Checking", False)
-    balance = 0
-    if ledger_csv:
-        with open(ledger_csv) as file:
-            reader = csv.DictReader(file, delimiter=",")
-            entry_amount = sum(float(row['Entry Amount']) for row in reader)
-        balance += entry_amount
+def recalculateAllTransactions():  # Recalculating the transactions in the ledger to get the real balance
+    ledger_csv = loadCSV(input_file_name="Checking", print_values=False)  # loads the csv file as a variable
+    balance = 0  # initializes balance variable
+    if ledger_csv:  # checks if there is a ledger csv file
+        with open(ledger_csv) as file:  # opens the csv file
+            reader = csv.DictReader(file, delimiter=",")  # reads the file using csv dictreader, splits data by ,
+            entry_amount = sum(float(row['Entry Amount']) for row in reader)  # adds every item in row
+        balance += entry_amount  # sets balance to the function above
     return balance
 
 
-############################ User Input Methods ############################
-
-
-def inputInteger(question):  ##### Allows Integer input that throws an error for exceptions
+def inputInteger(question):  # Allows Integer input that throws an error for exceptions
     while True:
         try:
             number = int(input(question))
@@ -38,7 +51,7 @@ def inputInteger(question):  ##### Allows Integer input that throws an error for
     return number
 
 
-def inputFloat(question):  ##### Allows Float input that throws an error for exceptions
+def inputFloat(question):  # Allows Float input that throws an error for exceptions
     while True:
         try:
             number = float(input(question))
@@ -48,7 +61,7 @@ def inputFloat(question):  ##### Allows Float input that throws an error for exc
     return number
 
 
-def inputString(question):  ##### Allows string input that throws an error for exceptions
+def inputString(question):  # Allows string input that throws an error for exceptions
     while True:
         try:
             string = str(input(question))
@@ -58,48 +71,47 @@ def inputString(question):  ##### Allows string input that throws an error for e
     return string
 
 
-def inputDate(question):  ##### Allows date input that throws an error for exceptions
+def inputDate(question):  # Allows date input that throws an error for exceptions
     while True:
         try:
             date_string = input(question)
             if date_string == "":
-                date_object = date.today().strftime('%m/%d/%Y')
+                date_object = date.today().strftime(
+                    '%m/%d/%Y')  # Uses date class to get today's date in mmddyyyy format
             else:
-                date_object = datetime.strptime(date_string, "%m/%d/%Y").strftime('%m/%d/%Y')
+                date_object = datetime.strptime(date_string, "%m/%d/%Y").strftime('%m/%d/%Y')  # checks formatting
             break
-        except ValueError:
+        except ValueError:  # checks if the format is not correct
             print("Incorrect format Use the format MM/DD/YYYY : ")
     return date_object
 
-    ############################ Load / Save CSV File ############################
 
-
-def checkDir(file_name):  ### Checks the directory to see if the data folder and ledger file exists.
+def checkDir(file_name):  # Checks the directory to see if the data folder and ledger file exists.
     directory = os.path.dirname(file_name)
     if not os.path.exists(directory):  ### If it doesn't exists, create one.
-        os.makedirs(directory)
+        os.makedirs(directory)  # creates the file but will not fill it with anything
 
 
-def loadCSV(input_file_name, print_values):  # file_name, dateInRangeStart, dateInRangeEnd, entries
-    directory = os.path.abspath(os.path.join(os.path.curdir))
-    file_name = directory + "/data/" + input_file_name + ".csv"
-    checkDir(file_name)
+def loadCSV(input_file_name, print_values):  # TODO: dateInRangeStart, dateInRangeEnd, entries
+    directory = os.path.abspath(os.path.join(os.path.curdir))  # initializes directory to the current directory
+    file_name = directory + "/data/" + input_file_name + ".csv"  # sets directory item /data/filename.csv to variable
+    checkDir(file_name)  # checks if the variable file_name is a valid path
     if not os.path.exists(file_name):
-        print("File does not exist!")
+        print("File does not exist!")  # if there is no file then print an error and return to main
         return
-    if os.path.exists(file_name) & print_values is True:
-        with open(file_name) as file:
-            reader = csv.DictReader(file, delimiter=",")
-            for row in reader:
+    if os.path.exists(file_name) & print_values is True:  # checks if there is a file, and if print values is true
+        with open(file_name) as file:  # opens file
+            reader = csv.DictReader(file)  # reads file with dict reader
+            for row in reader:  # prints every row
                 print(row)  # TODO: Format print output better, make print ledger entries its own function
     return file_name
 
 
 def saveCSV(input_file_name, entry_data, field_names):
-    directory = os.path.abspath(os.path.join(os.path.curdir))
-    file_name = directory + "/data/" + input_file_name + ".csv"
-    checkDir(file_name)  ### Checks for the directory
-    ledger_size = 0
+    directory = os.path.abspath(os.path.join(os.path.curdir)) # initializes directory to the current directory
+    file_name = directory + "/data/" + input_file_name + ".csv" # sets directory item /data/filename.csv to variable
+    checkDir(file_name)  # checks if the variable file_name is a valid path
+    ledger_size = 0 # initializes ledger size
     count = 0
 
     if os.path.exists(file_name) and os.path.isfile(file_name):
@@ -128,10 +140,10 @@ def saveCSV(input_file_name, entry_data, field_names):
 
 
 def addEntryToLedger(entry_name, entry_date, entry_amount):
-    entry_data = [entry_name, entry_amount, entry_date]
-    field_names = ['Entry Name', 'Entry Amount', 'Entry Date']
+    entry_data = [entry_name, entry_amount, entry_date] # Sets up variables for ledger data based off of input
+    field_names = ['Entry Name', 'Entry Amount', 'Entry Date'] # Sets up variable names for csv header
 
-    saveCSV("Checking", entry_data, field_names)
+    saveCSV("Checking", entry_data, field_names) # appends the entry data to the csv file
 
     # calculateCurrentBalance(entryAmount)
 
@@ -145,7 +157,7 @@ def createEntry():
     ### Asking for Input
     entry_name = inputString("Please enter the entry's name: ")
     entry_date = inputDate("Please enter the entry's  or leave blank to use today's date"
-                          " \nUse the format MM/DD/YYYY : ")
+                           " \nUse the format MM/DD/YYYY : ")
     entry_amount = inputFloat("Please enter an amount, use a negative for any bills: $")
 
     ## Save to data file
@@ -156,7 +168,7 @@ def createEntry():
 
 def createRandomEntry():
     random_names = ["The Polar Fiddler", "The Olive Drum", "The Bengal Drum", "The Solar Castle", "The Fire Fusion",
-                   "Cinnamon", "The Nightingale", "Fantasia", "Roadhouse"]
+                    "Cinnamon", "The Nightingale", "Fantasia", "Roadhouse"]
     entry_name = random.choice(random_names)  ### Chooses a random name from the list above
 
     start_date = date.today().replace(day=1, month=1).toordinal()
@@ -173,32 +185,7 @@ def createRandomEntry():
     return
 
 
-############################ List Entries ############################
-
-# TODO: Create a function to list the entries in order by date
-
-############################ Account Information ############################
-
-# TODO: Create Income vs bill entry
-# TODO: Get account balance
-# TODO: Add calendar entries
-# TODO: Add Repeating bills
-# TODO: Categories
-
-# TODO: Eventual Snowball planner
-# TODO: Credit card account APR Planner
-
-
-def main():
-    total_balance = 0
-    total_balance = recalculateAllTransactions()  ### On start recalculate all balances
-
-    ############################ RUN / Start checking for input commands ############################
-
-    print("\n")  # Decorative line break
-    # TODO: Print a description of the program on start
-    command_input = input("Please enter a command or type help: ")
-
+def inputCommand(command_input, current_balance):
     if command_input == "help":
         print("Command list:"
               "\naddTransaction - Adds an Entry into the checkbook",
@@ -208,32 +195,33 @@ def main():
               "\nprintBalance - prints the current balance",
               "\nrecalculateBalance - Recalculates all balances"
               )
-        return main()
-
-    if command_input == "addTransaction":
+    elif command_input == "addTransaction":
         createEntry()
-        return main()
 
-    if command_input == "randomTransaction":
+    elif command_input == "randomTransaction":
         createRandomEntry()
-        return main()
 
-    if command_input == "listTransactions":
+    elif command_input == "listTransactions":
         loadCSV("Checking", print_values=True)
-        return main()
 
-    if command_input == "recalculateBalance":
-        total_balance == recalculateAllTransactions()
-        print("Current Balance: ", round(total_balance, 2))
-        return main()
+    elif command_input == "recalculateBalance":
+        current_balance == recalculateAllTransactions()
+        print("Current Balance: ", round(current_balance, 2))
 
-    if command_input == "printBalance":
-        print("Current Balance: ", round(total_balance, 2))
-        return main()
-
+    elif command_input == "printBalance":
+        print("Current Balance: ", round(current_balance, 2))
     else:
         print("That is not a valid command! Please try again.")
-        return main()
+    return main()
+
+
+def main():
+    total_balance = recalculateAllTransactions()  ### On start recalculate all balances
+
+    print("\n")  # Decorative line break
+
+    command_input = input("Please enter a command or type help: ")
+    inputCommand(command_input, total_balance)
 
 
 if __name__ == "__main__":
