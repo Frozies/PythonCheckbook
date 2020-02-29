@@ -10,11 +10,10 @@ import csv
 import random
 
 
-def getLastEntryAmount(file_path, input_file_name):
+def getLastEntryAmount(file_path):
     checkDir(file_path=file_path)
 
     file_name = loadCSV(input_file_name='Checking', print_values=False, return_open_file=False)
-
 
     with open(file_name) as file:  # opens file
         reader = csv.reader(file)  # reads file with dict reader
@@ -89,8 +88,7 @@ def inputDate(question):  # Allows date input that throws an error for exception
 
 def checkDir(file_path):  # Checks the directory to see if the data folder and ledger file exists.
     directory = os.path.dirname(file_path)
-    ledger_size = os.stat(file_path).st_size  ### Sets the var ledger_size to see if its a new file or not.
-
+    ledger_size = 0
     field_names = ['Entry Name', 'Entry Amount', 'Entry Date',
                    'Current Balance']  # Sets up variable names for csv header
     new_data = ["0", 0, '00/00/0000', 0]  # Sets up variables for ledger data based off of input
@@ -99,20 +97,15 @@ def checkDir(file_path):  # Checks the directory to see if the data folder and l
     if not os.path.exists(directory):  ### If it doesn't exists, create one.
         os.makedirs(directory)  # creates the folder  but will not fill it with anything
 
+    try:
+        ledger_size = os.stat(file_path).st_size  ### Sets the var ledger_size to see if its a new file or not.
+    except FileNotFoundError:
+        pass
 
     if ledger_size == 0:
-        with open(file_path, newline='', mode='w') as csv_file:
-            csv_file = csv.DictWriter(file_path, fieldnames=field_names)
-            for record in new_data:
-                csv_file.writeheader()
+        writeDataToCSV(file_path=file_path, entry_data=field_names)
+        writeDataToCSV(file_path=file_path, entry_data=new_data)
 
-                if count == len(new_data) - 1:  ### Checks to see if the current record section is the last.
-                    csv_file.write('%s\n' % record)  ### Prints a new line with no comma
-
-                if count != len(new_data) - 1:  ### If not the last record, then write the key value with a comma
-                    csv_file.write('%s,' % record)
-                    count += 1  ### Increase record count
-            csv_file.close()
     return
 
 
@@ -141,45 +134,37 @@ def saveCSV(input_file_name, entry_data):
     file_path = directory + "/data/" + input_file_name + ".csv"  # sets directory item /data/filename.csv to variable
     checkDir(file_path)  # checks if the variable file_name is a valid path
     ledger_size = 0  # initializes ledger size
-    count = 0
-    field_names = ['Entry Name', 'Entry Amount', 'Entry Date',
-                   'Current Balance']  # Sets up variable names for csv header
 
-    entry_amount = entry_data[2]
-    current_balance = entry_amount + float(getLastEntryAmount(input_file_name=input_file_name, file_path=file_path))
+    entry_amount = entry_data[1]
+    current_balance = float(entry_amount) + float(getLastEntryAmount(file_path=file_path))
     entry_data.append(current_balance)
 
     if os.path.exists(file_path) and os.path.isfile(file_path):
         ledger_size = os.stat(file_path).st_size  ### Sets the var ledger_size to see if its a new file or not.
 
     if not os.path.exists(file_path) or ledger_size == 0:
-
         new_data = ["0", 0, '00/00/0000', 0]  # Sets up variables for ledger data based off of input
+        writeDataToCSV(file_path=file_path, entry_data=new_data)
 
-        with open(file_path, 'w', newline='') as csv_file:
-            csv_file = csv.DictWriter(file_path, fieldnames=field_names)
-            for record in new_data:
-                csv_file.writeheader()
+    writeDataToCSV(file_path=file_path, entry_data=entry_data)
+    return
 
-                if count == len(new_data) - 1:  ### Checks to see if the current record section is the last.
-                    csv_file.write('%s\n' % record)  ### Prints a new line with no comma
 
-                if count != len(new_data) - 1:  ### If not the last record, then write the key value with a comma
-                    csv_file.write('%s,' % record)
-                    count += 1  ### Increase record count
-            csv_file.close()
+def writeDataToCSV(file_path, entry_data):
+    count = 0
 
-    with open(file_path, 'w', newline='') as csv_file:
-        csv_file = csv.DictWriter(file_path, fieldnames=field_names)
-        for record in entry_data:
+    for record in entry_data:
 
-            if count == len(entry_data) - 1:  ### Checks to see if the current record section is the last.
-                csv_file.write('%s\n' % record)  ### Prints a new line with no comma
+        if count == len(entry_data) - 1:  ### Checks to see if the current record section is the last.
+            csvFile = open(file_path, 'a')
+            csvFile.write('%s\n' % record)  ### Prints a new line with no comma
 
-            if count != len(entry_data) - 1:  ### If not the last record, then write the key value with a comma
-                csv_file.write('%s,' % record)
-                count += 1  ### Increase record count
-        csv_file.close()
+        if count != len(entry_data) - 1:  ### If not the last record, then write the key value with a comma
+            csvFile = open(file_path, 'a')
+            csvFile.write('%s,' % record)
+            count += 1  ### Increase record count
+
+        csvFile.close()
     return
 
 
@@ -226,6 +211,10 @@ def createRandomEntry():
 
 def inputCommand(command_input):
     current_balance = float(0)
+    active_ledger = "Checking"
+
+    directory = os.path.abspath(os.path.join(os.path.curdir))  # initializes directory to the current directory
+    file_path = directory + "/data/" + active_ledger + ".csv"  # sets directory item /data/filename.csv to variable
 
     if command_input == "help":
         print("Command list:"
@@ -250,7 +239,7 @@ def inputCommand(command_input):
         print("Current Balance: ", round(current_balance, 2))
 
     elif command_input == "printBalance":
-        current_balance == getLastEntryAmount()
+        current_balance == getLastEntryAmount(file_path=file_path)
         print("Current Balance: ", round(current_balance, 2))
     else:
         print("That is not a valid command! Please try again.")
