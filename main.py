@@ -214,7 +214,13 @@ def createRandomEntry():
     if bool(random.getrandbits(1)):  ### Randomizes to count as bill or income
         entry_amount = entry_amount * -1
 
-    addEntryToLedger(entry_name, entry_date, entry_amount)  ### Adds entry command
+    checkCategoryPath()
+    directory = os.path.abspath(os.path.join(os.path.curdir))  # initializes directory to the current directory
+    file_path = directory + "/data/Categories.config"  # sets directory item /data/filename.csv to variable
+    cat_list = [line.rstrip('\n') for line in open(file_path)]
+    random_category_index = round(random.random() * len(cat_list))
+
+    addEntryToLedger(entry_name, entry_date, entry_amount, cat_list[random_category_index])  ### Adds entry command
     return
 
 
