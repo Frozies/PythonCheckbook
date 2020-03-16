@@ -6,7 +6,7 @@
 ####################
 import math
 import os
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import csv
 import random
 
@@ -14,7 +14,7 @@ import random
 def getLastEntryAmount(file_path):
     checkLedgerPath(file_path=file_path)
 
-    file_name = loadCSV(input_file_name='Checking', print_values=False, return_open_file=False)
+    file_name = loadCSV(input_file_name='Checking', print_values=False)
 
     with open(file_name) as file:  # opens file
         reader = csv.reader(file)  # reads file with dict reader
@@ -27,15 +27,14 @@ def getLastEntryAmount(file_path):
 
 
 def recalculateAllTransactions():  # Recalculating the transactions in the ledger to get the real balance
-    ledger_csv = loadCSV(input_file_name="Checking", print_values=False,
-                         return_open_file=False)  # loads the csv file as a variable
+    ledger_path = loadCSV(input_file_name="Checking", print_values=False)  # loads the csv file as a variable
     balance = 0  # initializes balance variable
-    if ledger_csv:  # checks if there is a ledger csv file
-        with open(ledger_csv) as file:  # opens the csv file
+    if ledger_path:  # checks if there is a ledger csv file
+        with open(ledger_path) as file:  # opens the csv file
             reader = csv.DictReader(file, delimiter=",")  # reads the file using csv dictreader, splits data by ,
             entry_amount = sum(float(row['Entry Amount']) for row in reader)  # adds every item in row
         balance += entry_amount  # sets balance to the function above
-    last_entry_balance = getLastEntryAmount()
+    last_entry_balance = getLastEntryAmount(ledger_path)
     if balance == last_entry_balance:
         print("Balance was correct")
     return balance
@@ -91,8 +90,6 @@ def checkLedgerPath(file_path):  # Checks the directory to see if the data folde
     ledger_size = 0
     field_names = ['Entry Name', 'Entry Amount', 'Entry Date', 'Category',
                    'Current Balance']  # Sets up variable names for csv header
-    new_data = ["0", 0, '00/00/0000', 0, 0]  # Sets up variables for ledger data based off of input
-    count = 0
 
     if not os.path.exists(directory):  ### If it doesn't exists, create one.
         os.makedirs(directory)  # creates the folder  but will not fill it with anything
@@ -104,29 +101,21 @@ def checkLedgerPath(file_path):  # Checks the directory to see if the data folde
 
     if ledger_size == 0:
         writeDataToCSV(file_path=file_path, entry_data=field_names)
-        writeDataToCSV(file_path=file_path, entry_data=new_data)
 
     return
 
 
-def loadCSV(input_file_name, print_values, return_open_file):  # TODO: dateInRangeStart, dateInRangeEnd, entries
+def loadCSV(input_file_name, print_values):  # TODO: dateInRangeStart, dateInRangeEnd, entries
 
     directory = os.path.abspath(os.path.join(os.path.curdir))  # initializes directory to the current directory
     file_path = directory + "/data/" + input_file_name + ".csv"  # sets directory item /data/filename.csv to variable
     checkLedgerPath(file_path)  # checks if the variable file_name is a valid path
-    checkCategoryPath()
-    category_path = directory + "/data/Categories.config"  # sets directory item /data/filename.csv to variable
 
-    if os.path.exists(file_path) & return_open_file is True:  # checks if there is a file and returns the opened file
+    if os.path.exists(file_path) & print_values is True:  # checks if there is a file, and if print values is true
         with open(file_path) as file:  # opens file
-            reader = csv.DictReader(file)  # reads file with dict reader
-            return reader  # Returns an opened file to read from
-
-    elif os.path.exists(file_path) & print_values is True:  # checks if there is a file, and if print values is true
-        with open(file_path) as file:  # opens file
-            reader = csv.DictReader(file)  # reads file with dict reader
+            reader = csv.DictReader(file)  # reads file with dict readerkk
             for row in reader:  # prints every row
-                print(row)
+                print("row:"+ row + ".")
 
     return file_path
 
@@ -135,18 +124,13 @@ def saveCSV(input_file_name, entry_data):
     directory = os.path.abspath(os.path.join(os.path.curdir))  # initializes directory to the current directory
     file_path = directory + "/data/" + input_file_name + ".csv"  # sets directory item /data/filename.csv to variable
     checkLedgerPath(file_path)  # checks if the variable file_name is a valid path
-    ledger_size = 0  # initializes ledger size
 
     entry_amount = entry_data[1]
-    current_balance = round(float(entry_amount) + float(getLastEntryAmount(file_path=file_path)), 2)
-    entry_data.append(current_balance)
-
-    if os.path.exists(file_path) and os.path.isfile(file_path):
-        ledger_size = os.stat(file_path).st_size  ### Sets the var ledger_size to see if its a new file or not.
-
-    if not os.path.exists(file_path) or ledger_size == 0:
-        new_data = ["0", 0, '00/00/0000', 0, 0]  # Sets up variables for ledger data based off of input
-        writeDataToCSV(file_path=file_path, entry_data=new_data)
+    if not getLastEntryAmount(file_path=file_path) == "Current Balance":
+        current_balance = round(float(entry_amount) + float(getLastEntryAmount(file_path=file_path)), 2)
+    else:
+        current_balance = entry_amount
+    entry_data.append(float(current_balance))
 
     writeDataToCSV(file_path=file_path, entry_data=entry_data)
     return
@@ -285,9 +269,53 @@ def listCategory():
     return
 
 
-def inputCommand(command_input):
+def sumCategories(active_ledger):
+    # date_range = today's date - 30 days
+
+    # read data from ledger file, active_ledger
+    # reverse list
+    # check if the date is in range with date_range
+    # retrieve category text and compare to category config
+    # if the category doesnt exist, add it to the config
+    # skip if length == index or length - 1 == index (first and 2nd default entries skipped)
+    # make a new list with the length of categories config
+    # add the current transaction to this list
+    # once done print data
+    #
+    #   This month's Spending
+    #   Food: $153.31
+    #   Gas: $204.45
+    #   Rent: $800.00
+    #   Entertainment: $103.22
+
+    start_date = (date.today() - timedelta(days=30)).toordinal()
+    end_date = date.today().toordinal()
+    cat_sums = []
+    ledger_path = loadCSV(input_file_name=active_ledger, print_values=False)
+
+    with open(ledger_path) as file:  # opens file
+        row_index = 3  # pick what row you want
+        reader = csv.reader(file)  # reads file with dict reader
+        data = [row for row in reader]  # sets the list data to a variable
+        data_reversed = data[::-1]  # slice - No value before or after the first colon and increment by -1
+
+        print(delta_date)
+
+        for i in data_reversed:
+            print("sum cat: " + str(i))
+
+
+        #column_data = [row[row_index] for row in data_reversed]  # chooses a column based on the number you pick
+        #retrieved_data = column_data[0]  # picks the first values #index
+
+
+
+    return
+
+
+def inputCommand(command_input, active_ledger):
+    print() # Decorative Print
     current_balance = float(0)
-    active_ledger = "Checking"
 
     directory = os.path.abspath(os.path.join(os.path.curdir))  # initializes directory to the current directory
     file_path = directory + "/data/" + active_ledger + ".csv"  # sets directory item /data/filename.csv to variable
@@ -310,7 +338,7 @@ def inputCommand(command_input):
         createRandomEntry()
 
     elif command_input == "listTransactions":
-        loadCSV("Checking", print_values=True, return_open_file=False)
+        loadCSV("Checking", print_values=True)
 
     elif command_input == "recalculateBalance":
         current_balance == recalculateAllTransactions()
@@ -332,10 +360,11 @@ def inputCommand(command_input):
 
 
 def main():
-    print("\n")  # Decorative line break
+    print() # Decorative Print
+    active_ledger = "Checking"
 
     command_input = input("Please enter a command or type help: ")
-    inputCommand(command_input)
+    inputCommand(command_input, active_ledger=active_ledger)
 
     return
 
