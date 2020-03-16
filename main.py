@@ -114,7 +114,7 @@ def loadCSV(input_file_name, print_values):  # TODO: dateInRangeStart, dateInRan
     if os.path.exists(file_path) & print_values is True:  # checks if there is a file, and if print values is true
         with open(file_path) as file:  # opens file
             reader = csv.reader(file)  # reads file with dict reader
-            for row in reader:  # prints every row
+            for row in reader:
                 print('{:<25} {:<15} {:<15} {:<15} {:<15}'.format(*row))
 
     return file_path
@@ -129,12 +129,11 @@ def saveCSV(input_file_name, entry_data):
     if not getLastEntryAmount(file_path=file_path) == "Current Balance":
         current_balance = round(float(entry_amount) + float(getLastEntryAmount(file_path=file_path)), 2)
     else:
-        current_balance = entry_amount
+        current_balance = float(entry_amount)
     entry_data.append(float(current_balance))
 
     writeDataToCSV(file_path=file_path, entry_data=entry_data)
     return
-
 
 def writeDataToCSV(file_path, entry_data):
     count = 0
@@ -244,6 +243,7 @@ def checkCategoryPath():
     try:
         ledger_size = os.stat(file_path).st_size  ### Sets the var ledger_size to see if its a new file or not.
     except FileNotFoundError:
+        os.mkdir(directory + "/data/")
         open(file_path, 'x')
 
     if ledger_size == 0:
