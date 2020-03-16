@@ -18,9 +18,9 @@ def getLastEntryAmount(file_path):
 
     with open(file_name) as file:  # opens file
         reader = csv.reader(file)  # reads file with dict reader
-        row_index = 4  # pick what row you want
         data = [row for row in reader]  # sets the list data to a variable
         data_reversed = data[::-1]  # slice - No value before or after the first colon and increment by -1
+        row_index = 4  # pick what row you want
         column_data = [row[row_index] for row in data_reversed]  # chooses a column based on the number you pick
         retrieved_data = column_data[0]  # picks the first values
     return retrieved_data
@@ -113,9 +113,9 @@ def loadCSV(input_file_name, print_values):  # TODO: dateInRangeStart, dateInRan
 
     if os.path.exists(file_path) & print_values is True:  # checks if there is a file, and if print values is true
         with open(file_path) as file:  # opens file
-            reader = csv.DictReader(file)  # reads file with dict readerkk
+            reader = csv.reader(file)  # reads file with dict reader
             for row in reader:  # prints every row
-                print("row:"+ row + ".")
+                print('{:<25} {:<15} {:<15} {:<15} {:<15}'.format(*row))
 
     return file_path
 
@@ -160,7 +160,8 @@ def addEntryToLedger(entry_name, entry_date, entry_amount, category_index):
 
     saveCSV("Checking", entry_data)  # appends the entry data to the csv file
 
-    print(entry_data, " was added to the ledger!")
+    print(entry_name, "totaling $" + str(entry_amount), "on", entry_date, "under the category", category_index,
+          "was added to the ledger!")
     return
 
 
@@ -202,7 +203,7 @@ def createRandomEntry():
     directory = os.path.abspath(os.path.join(os.path.curdir))  # initializes directory to the current directory
     file_path = directory + "/data/Categories.config"  # sets directory item /data/filename.csv to variable
     cat_list = [line.rstrip('\n') for line in open(file_path)]
-    random_category_index = round(random.random() * len(cat_list))
+    random_category_index = round(random.random() * len(cat_list)-1)
 
     addEntryToLedger(entry_name, entry_date, entry_amount, cat_list[random_category_index])  ### Adds entry command
     return
@@ -270,45 +271,31 @@ def listCategory():
 
 
 def sumCategories(active_ledger):
-    # date_range = today's date - 30 days
+    # start_date = (date.today() - timedelta(days=30)).toordinal()
+    # end_date = date.today().toordinal()
 
-    # read data from ledger file, active_ledger
-    # reverse list
-    # check if the date is in range with date_range
-    # retrieve category text and compare to category config
-    # if the category doesnt exist, add it to the config
-    # skip if length == index or length - 1 == index (first and 2nd default entries skipped)
-    # make a new list with the length of categories config
-    # add the current transaction to this list
-    # once done print data
-    #
-    #   This month's Spending
-    #   Food: $153.31
-    #   Gas: $204.45
-    #   Rent: $800.00
-    #   Entertainment: $103.22
-
-    start_date = (date.today() - timedelta(days=30)).toordinal()
-    end_date = date.today().toordinal()
-    cat_sums = []
     ledger_path = loadCSV(input_file_name=active_ledger, print_values=False)
 
     with open(ledger_path) as file:  # opens file
-        row_index = 3  # pick what row you want
         reader = csv.reader(file)  # reads file with dict reader
         data = [row for row in reader]  # sets the list data to a variable
         data_reversed = data[::-1]  # slice - No value before or after the first colon and increment by -1
 
-        print(delta_date)
+        value_index = 1
+        category_index = 3
 
-        for i in data_reversed:
-            print("sum cat: " + str(i))
+        category_data = [row[category_index] for row in data_reversed]  # chooses a column based on the number you pick
+        value_data = [row[value_index] for row in data_reversed]  # chooses a column based on the number you pick
 
+        category_value = dict()
+        for i in range(0,len(data_reversed)-1):
+            current_category = category_data[i]
+            current_value = value_data[i]
+            sum_values = float(current_value) + float(category_value.get(current_category, 0))
+            category_value[current_category] = round(sum_values, 2)
 
-        #column_data = [row[row_index] for row in data_reversed]  # chooses a column based on the number you pick
-        #retrieved_data = column_data[0]  # picks the first values #index
-
-
+        print("Overall Budget\n")
+        print(f"\n".join("{:<15}\t${}".format(k, v) for k, v in category_value.items()))
 
     return
 
@@ -329,7 +316,8 @@ def inputCommand(command_input, active_ledger):
               "\nprintBalance - prints the current balance",
               "\nrecalculateBalance - Recalculates all balances",
               "\naddCategory - Add a category to choose from",
-              "\nlistCategories - Lists all of the current categories to pick from"
+              "\nlistCategories - Lists all of the current categories to pick from",
+              "\nlistSpending - List all of the spending organized by category"
               )
     elif command_input == "addTransaction":
         createEntry()
@@ -354,6 +342,8 @@ def inputCommand(command_input, active_ledger):
         print(user_input + " was added to the list of categories!")
     elif command_input == "listCategories":
         listCategory()
+    elif command_input == "listSpending":
+        sumCategories(active_ledger=active_ledger)
     else:
         print("That is not a valid command! Please try again.")
     return main()
