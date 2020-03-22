@@ -26,20 +26,6 @@ def getLastEntryAmount(file_path):
     return retrieved_data
 
 
-def recalculateAllTransactions():  # Recalculating the transactions in the ledger to get the real balance
-    ledger_path = loadCSV(input_file_name="Checking", print_values=False)  # loads the csv file as a variable
-    balance = 0  # initializes balance variable
-    if ledger_path:  # checks if there is a ledger csv file
-        with open(ledger_path) as file:  # opens the csv file
-            reader = csv.DictReader(file, delimiter=",")  # reads the file using csv dictreader, splits data by ,
-            entry_amount = sum(float(row['Entry Amount']) for row in reader)  # adds every item in row
-        balance += entry_amount  # sets balance to the function above
-    last_entry_balance = getLastEntryAmount(ledger_path)
-    if balance == last_entry_balance:
-        print("Balance was correct")
-    return balance
-
-
 def inputInteger(question):  # Allows Integer input that throws an error for exceptions
     while True:
         try:
@@ -338,11 +324,10 @@ def inputCommand(command_input, active_ledger):
               "\nhelp - Shows a list of commands",
               "\nrandomTransaction - creates a random entry to input into the ledger (for debug c:)",
               "\nlistTransactions - lists entries in ledger",
-              "\nprintBalance - prints the current balance",
-              "\nrecalculateBalance - Recalculates all balances",
+              "\nbalance - prints the current balance",
               "\naddCategory - Add a category to choose from",
-              "\nlistCategories - Lists all of the current categories to pick from",
-              "\nlistSpending - List all of the spending organized by category"
+              "\ncategories - Lists all of the current categories to pick from",
+              "\nspending - List all of the spending organized by category"
               )
     elif command_input == "addTransaction":
         createEntry()
@@ -353,11 +338,7 @@ def inputCommand(command_input, active_ledger):
     elif command_input == "listTransactions":
         loadCSV("Checking", print_values=True)
 
-    elif command_input == "recalculateBalance":
-        current_balance == recalculateAllTransactions()
-        print("Current Balance: ", round(current_balance, 2))
-
-    elif command_input == "printBalance":
+    elif command_input == "balance":
         current_balance = getLastEntryAmount(file_path=file_path)
         print("Current Balance: ", round(float(current_balance), 2))
 
@@ -365,9 +346,9 @@ def inputCommand(command_input, active_ledger):
         user_input = str(input("Enter the categories name: "))
         saveCategory(user_input)
         print(user_input + " was added to the list of categories!")
-    elif command_input == "listCategories":
+    elif command_input == "categories":
         listCategory()
-    elif command_input == "listSpending":
+    elif command_input == "spending":
         sumCategories(active_ledger=active_ledger)
     else:
         print("That is not a valid command! Please try again.")
