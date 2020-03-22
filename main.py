@@ -392,9 +392,12 @@ def startup():
     # savings_balance = getLastEntryAmount(file_path=savings_file_path)
 
     print("Welcome to my accounting software!")
-    if float(checking_balance):
-        print("Current Balance in checking: $" + str(round(float(checking_balance), 2)))
-    else:
+    try:
+        if float(checking_balance):
+            print("Current Balance in checking: $" + str(round(float(checking_balance), 2)))
+        else:
+            print("Current Balance in checking: ", "$0.00")
+    except ValueError:
         print("Current Balance in checking: ", "$0.00")
 
     # print("Current Balance in savings: ", round(float(savings_balance), 2))
