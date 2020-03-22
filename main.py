@@ -114,8 +114,13 @@ def loadCSV(input_file_name, print_values):  # TODO: dateInRangeStart, dateInRan
     if os.path.exists(file_path) & print_values is True:  # checks if there is a file, and if print values is true
         with open(file_path) as file:  # opens file
             reader = csv.reader(file)  # reads file with dict reader
+            index = 0
             for row in reader:
-                print('{:<25} {:<15} {:<15} {:<15} {:<15}'.format(*row))
+                if index == 0:
+                    print('{:<25} {:<15} {:<15} {:<15} {:<15}'.format(*row)) # Prints Header without '$'
+                else:
+                    print('{:<25} ${:<15} {:<15} {:<15} ${:<15}'.format(*row)) # Prints a '$' on any transactions
+                index += 1
 
     return file_path
 
@@ -134,6 +139,7 @@ def saveCSV(input_file_name, entry_data):
 
     writeDataToCSV(file_path=file_path, entry_data=entry_data)
     return
+
 
 def writeDataToCSV(file_path, entry_data):
     count = 0
@@ -202,7 +208,7 @@ def createRandomEntry():
     directory = os.path.abspath(os.path.join(os.path.curdir))  # initializes directory to the current directory
     file_path = directory + "/data/Categories.config"  # sets directory item /data/filename.csv to variable
     cat_list = [line.rstrip('\n') for line in open(file_path)]
-    random_category_index = round(random.random() * len(cat_list)-1)
+    random_category_index = round(random.random() * len(cat_list) - 1)
 
     addEntryToLedger(entry_name, entry_date, entry_amount, cat_list[random_category_index])  ### Adds entry command
     return
@@ -288,20 +294,20 @@ def sumCategories(active_ledger):
         value_data = [row[value_index] for row in data_reversed]  # chooses a column based on the number you pick
 
         category_value = dict()
-        for i in range(0,len(data_reversed)-1):
+        for i in range(0, len(data_reversed) - 1):
             current_category = category_data[i]
             current_value = value_data[i]
             sum_values = float(current_value) + float(category_value.get(current_category, 0))
             category_value[current_category] = round(sum_values, 2)
 
         print("Overall Budget\n")
-        print(f"\n".join("{:<15}\t${}".format(k, v) for k, v in category_value.items()))
+        print(f"\n".join("{:<15}\t${}".format(key, value) for key, value in category_value.items()))
 
     return
 
 
 def inputCommand(command_input, active_ledger):
-    print() # Decorative Print
+    print()  # Decorative Print
     current_balance = float(0)
 
     directory = os.path.abspath(os.path.join(os.path.curdir))  # initializes directory to the current directory
@@ -350,7 +356,7 @@ def inputCommand(command_input, active_ledger):
 
 
 def main():
-    print() # Decorative Print
+    print()  # Decorative Print
     active_ledger = "Checking"
 
     command_input = input("Please enter a command or type help: ")
