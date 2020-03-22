@@ -125,18 +125,19 @@ def loadCSV(input_file_name, print_values, list_amount=0):  # TODO: dateInRangeS
                     index += 1
 
             elif list_amount > 0:
-                count = 0
                 data = [row for row in reader]  # sets the list data to a variable
                 data_reversed = data[::-1]
-                while count < (len(data) - 1):
-                    if count < list_amount:
+                if not len(data_reversed) - 1 <= list_amount:
+                    while index < list_amount - 1:
                         for row in data_reversed:
-                            if not count >= list_amount:
-                                if not index == len(data_reversed) - 1:
-                                    print('{:<25} ${:<15} {:<15} {:<15} ${:<15}'.format(*row))
-                                    count += 1
-                                    index += 1
-
+                            if index <= list_amount - 1:
+                                print('{:<25} ${:<15} {:<15} {:<15} ${:<15}'.format(*row))
+                                index += 1
+                else:
+                    for row in data_reversed:
+                        if index < len(data_reversed) - 1:
+                            print('{:<25} ${:<15} {:<15} {:<15} ${:<15}'.format(*row))
+                            index += 1
     return file_path
 
 
