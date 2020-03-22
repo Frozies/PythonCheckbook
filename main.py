@@ -105,7 +105,7 @@ def checkLedgerPath(file_path):  # Checks the directory to see if the data folde
     return
 
 
-def loadCSV(input_file_name, print_values):  # TODO: dateInRangeStart, dateInRangeEnd, entries
+def loadCSV(input_file_name, print_values, list_amount=0):  # TODO: dateInRangeStart, dateInRangeEnd, entries
 
     directory = os.path.abspath(os.path.join(os.path.curdir))  # initializes directory to the current directory
     file_path = directory + "/data/" + input_file_name + ".csv"  # sets directory item /data/filename.csv to variable
@@ -115,12 +115,27 @@ def loadCSV(input_file_name, print_values):  # TODO: dateInRangeStart, dateInRan
         with open(file_path) as file:  # opens file
             reader = csv.reader(file)  # reads file with dict reader
             index = 0
-            for row in reader:
-                if index == 0:
-                    print('{:<25} {:<15} {:<15} {:<15} {:<15}'.format(*row)) # Prints Header without '$'
-                else:
-                    print('{:<25} ${:<15} {:<15} {:<15} ${:<15}'.format(*row)) # Prints a '$' on any transactions
-                index += 1
+
+            if list_amount == 0 or list_amount < 0:
+                for row in reader:
+                    if index == 0:
+                        print('{:<25} {:<15} {:<15} {:<15} {:<15}'.format(*row))  # Prints Header without '$'
+                    else:
+                        print('{:<25} ${:<15} {:<15} {:<15} ${:<15}'.format(*row))  # Prints a '$' on any transactions
+                    index += 1
+
+            elif list_amount > 0:
+                count = 0
+                data = [row for row in reader]  # sets the list data to a variable
+                data_reversed = data[::-1]
+                while count < (len(data) - 1):
+                    if count < list_amount:
+                        for row in data_reversed:
+                            if not count >= list_amount:
+                                if not index == len(data_reversed) - 1:
+                                    print('{:<25} ${:<15} {:<15} {:<15} ${:<15}'.format(*row))
+                                    count += 1
+                                    index += 1
 
     return file_path
 
@@ -249,7 +264,10 @@ def checkCategoryPath():
     try:
         ledger_size = os.stat(file_path).st_size  ### Sets the var ledger_size to see if its a new file or not.
     except FileNotFoundError:
-        os.mkdir(directory + "/data/")
+        try:
+            os.mkdir(directory + "/data/")
+        except FileExistsError:
+            pass
         open(file_path, 'x')
 
     if ledger_size == 0:
@@ -365,5 +383,30 @@ def main():
     return
 
 
-if __name__ == "__main__":  # Prevents being ran on an import
+def startup():
+    directory = os.path.abspath(os.path.join(os.path.curdir))  # initializes directory to the current directory
+    checking_file_path = directory + "/data/" + "Checking.csv"  # sets directory item /data/filename.csv to variable
+    checking_balance = getLastEntryAmount(file_path=checking_file_path)
+
+    # savings_file_path = directory + "/data/" + "savings.csv"  # sets directory item /data/filename.csv to variable
+    # savings_balance = getLastEntryAmount(file_path=savings_file_path)
+
+    print("Welcome to my accounting software!")
+    if float(checking_balance):
+        print("Current Balance in checking: $" + str(round(float(checking_balance), 2)))
+    else:
+        print("Current Balance in checking: ", "$0.00")
+
+    # print("Current Balance in savings: ", round(float(savings_balance), 2))
+
+    print("\nHere are the last few transactions")
+    field_names = "{:<25} {:<15} {:<15} {:<15} {:<15}"
+
+    print(field_names.format("Entry Name", "Entry Amount", "Entry Date", "Category", "Current Balance"))
+    loadCSV(input_file_name="Checking", print_values=True, list_amount=5)
+
     main()
+
+
+if __name__ == "__main__":  # Prevents being ran on an import
+    startup()
