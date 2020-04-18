@@ -176,6 +176,7 @@ def checkLedgerPath(file_path):
         # Try to set the ledger's file size to that of the indicated ledger
 
     except FileNotFoundError:
+        print("Ledger file not found. Creating one now!")
 
         open(file_path, 'x')
         # Creates the file without writing any data.
@@ -335,8 +336,12 @@ def writeDataToCSV(file_path, entry_data):
         if count != len(
                 entry_data) - 1:
             # If not the last record, then write the key value with a comma
-
-            csv_file = open(file_path, 'a')
+            try:
+                csv_file = open(file_path, 'a')
+            except PermissionError:
+                print("It seems like you cant write to this file. Please try"
+                      " again")
+                main()
 
             csv_file.write('%s,' % record)
 
@@ -351,8 +356,7 @@ def addEntryToLedger(entry_name, entry_date, entry_amount, category_index):
     """
     Combines all the input parameters into a list and sends it off to be saved.
     Prints the saved data
-
-    Parameters:
+Parameters:
         entry_name (str): User input of a string to add to a ledger entry
         entry_date (datetime): User input of a date mm/dd/yyyy
         entry_amount (float): User input of a float to add to ledger entry
@@ -538,10 +542,12 @@ def checkCategoryPath():
         # Sets the var ledger_size to see if its a new file or not.
 
     except FileNotFoundError:
+        print("Categories configuration file now found. Creating one now!")
         try:
             os.mkdir(directory + "/data/")
 
         except FileExistsError:
+            print("Data folder already exists!")
             pass
 
         open(file_path, 'x')
@@ -641,6 +647,7 @@ def inputCommand(command_input, active_ledger):
     Retrieves the user's input to check against a list of strings with
     booleans. Then returns to main.
 
+    easy to expand!
     if commandInput == "foo":
         bar()
     elif commandInput == "bar":
