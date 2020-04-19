@@ -165,11 +165,14 @@ def checkLedgerPath(file_path):
                    'Current Balance']
     # Sets up variable names for csv header
 
-    if not os.path.exists(directory):
-        # If it doesn't exists, create one.
-
-        os.makedirs(directory)
-        # Creates the folder but will not fill it with anything
+    if not os.path.exists(directory):  # If it doesn't exists, create one.
+        try:
+            os.makedirs(directory)
+            # Creates the folder but will not fill it with anything
+        except PermissionError:
+            print("It seems like you cant write to this file. Please try"
+                  " again.")
+            main()
 
     try:
         ledger_size = os.stat(file_path).st_size
@@ -340,7 +343,7 @@ def writeDataToCSV(file_path, entry_data):
                 csv_file = open(file_path, 'a')
             except PermissionError:
                 print("It seems like you cant write to this file. Please try"
-                      " again")
+                      " again.")
                 main()
 
             csv_file.write('%s,' % record)
@@ -498,9 +501,13 @@ def saveCategory(entry_data):
     # sets directory item /data/filename.csv to variable
 
     checkCategoryPath()
-
-    with open(file_path, 'a') as file:
-        file.write(str(entry_data) + "\n")
+    try:
+        with open(file_path, 'a') as file:
+            file.write(str(entry_data) + "\n")
+    except PermissionError:
+        print("It seems like you cant write to this file. Please try"
+              " again.")
+        main()
 
     return
 
@@ -534,8 +541,13 @@ def checkCategoryPath():
                          'Entertainment\n'
 
     if not os.path.exists(directory):  # If it doesn't exists, create one.
-        os.makedirs(directory)
-        # Creates the folder but will not fill it with anything
+        try:
+            os.makedirs(directory)
+            # Creates the folder but will not fill it with anything
+        except PermissionError:
+            print("It seems like you cant write to this file. Please try"
+                  " again.")
+            main()
 
     try:
         ledger_size = os.stat(file_path).st_size
