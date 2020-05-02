@@ -7,7 +7,7 @@ The ledger file has five columns; Entry Name, Entry Amount, Entry Date, Category
 
 The category file can be edited or added to either in program or in a text editor. The default categories are: No Category, Income, Groceries, Housing, Transportation, Food, Utilities, Insurance, Medical, Savings, Entertainment/
 
-#Commands 
+# Commands 
 (case sensative):
 addTransaction - This promts the user for information about the transaction intended to be entered into the ledger.
 help - Lists all the commands in the program.
