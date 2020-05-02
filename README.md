@@ -11,10 +11,17 @@ The category file can be edited or added to either in program or in a text edito
 All these are case sensative
 
 addTransaction - This promts the user for information about the transaction intended to be entered into the ledger.
+
 help - Lists all the commands in the program.
+
 randomTransaction - Randomly generates a tranaction to be entered into the ledger.
+
 listTransactions - Shows a list of all the entries in the ledger file.
+
 balance - Shows your current balance after the last entry.
+
 addCategory - Adds to the category config file.
+
 categories - Lists all of the categories currently in the associated config file.
+
 spending - Adds up all of the transaction with their respected categories and shows the totals.
