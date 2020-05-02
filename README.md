@@ -9,6 +9,7 @@ The category file can be edited or added to either in program or in a text edito
 
 # Commands 
 (case sensative):
+
 addTransaction - This promts the user for information about the transaction intended to be entered into the ledger.
 help - Lists all the commands in the program.
 randomTransaction - Randomly generates a tranaction to be entered into the ledger.
