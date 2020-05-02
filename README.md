@@ -5,10 +5,10 @@ Apon running this program, it will create a new folder, "/data", in the root dir
 
 The ledger file has five columns; Entry Name, Entry Amount, Entry Date, Category, and Current Balance. Each entry will be added to a new line regardless of the entry date.
 
-The category file can be edited or added to either in program or in a text editor. The default categories are: No Category, Income, Groceries, Housing, Transportation, Food, Utilities, Insurance, Medical, Savings, Entertainment/
+The category file can be edited or added to either in program or in a text editor. The default categories are: No Category, Income, Groceries, Housing, Transportation, Food, Utilities, Insurance, Medical, Savings, Entertainment.
 
 # Commands:
-All these are case sensative
+All these are case sensative.
 
 addTransaction - This promts the user for information about the transaction intended to be entered into the ledger.
 
